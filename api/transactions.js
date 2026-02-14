@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import { checkAuth } from "./_auth.js";
 
-const WALLETS_BIN_ID = process.env.JSONBIN_WALLETS_BIN_ID;
+const TRANSACTIONS_BIN_ID = process.env.JSONBIN_TRANSACTIONS_BIN_ID;
 const API_KEY = process.env.JSONBIN_API_KEY;
 
 export default async function handler(req, res) {
@@ -11,18 +11,16 @@ export default async function handler(req, res) {
   if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
   try {
-    const walletsResp = await fetch(`https://api.jsonbin.io/v3/b/${WALLETS_BIN_ID}/latest`, {
+    const txResp = await fetch(`https://api.jsonbin.io/v3/b/${TRANSACTIONS_BIN_ID}/latest`, {
       headers: { "X-Master-Key": API_KEY }
     });
-    const walletsData = await walletsResp.json();
-    const wallets = walletsData.record;
+    const txData = await txResp.json();
+    const transactions = txData.record;
 
-    const wallet = wallets.find(w => w.userId === userId);
-    if (!wallet) return res.status(404).json({ error: "Wallet not found" });
-
-    return res.status(200).json(wallet);
+    const userTx = transactions.filter(t => t.userId === userId);
+    return res.status(200).json(userTx);
   } catch (err) {
-    console.error("Get balance error:", err);
+    console.error("Get transactions error:", err);
     return res.status(500).json({ error: "Server error" });
   }
 }
