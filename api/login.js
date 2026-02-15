@@ -6,8 +6,8 @@ const API_KEY = process.env.JSONBIN_API_KEY;
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const { email, password } = req.body;
-  if (!email || !password) return res.status(400).json({ error: "Email and password required" });
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: "Username and password required" });
 
   try {
     const usersResp = await fetch(`https://api.jsonbin.io/v3/b/${USERS_BIN_ID}/latest`, {
@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     const usersData = await usersResp.json();
     const users = usersData.record;
 
-    const user = users.find(u => u.email === email && u.password === password);
+    const user = users.find(u => u.username === username && u.password === password);
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
     // Mock token (simple string)
@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       token,
-      user: { id: user.id, name: user.name, email: user.email }
+      user: { id: user.id, name: user.name, username: user.username }
     });
   } catch (err) {
     console.error("Login error:", err);
