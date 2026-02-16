@@ -8,11 +8,11 @@ const API_KEY = process.env.JSONBIN_API_KEY;
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
-  const userId = checkAuth(req);
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  const username = checkAuth(req);
+  if (!username) return res.status(401).json({ error: "Unauthorized" });
 
-  const { recipientId, amount } = req.body;
-  if (!recipientId || !amount) return res.status(400).json({ error: "recipientId and amount required" });
+  const { recipientUsername, amount } = req.body;
+  if (!recipientUsername || !amount) return res.status(400).json({ error: "recipientUsername and amount required" });
 
   try {
     // Fetch wallets
@@ -22,8 +22,8 @@ export default async function handler(req, res) {
     const walletsData = await walletsResp.json();
     const wallets = walletsData.record;
 
-    const senderWallet = wallets.find(w => w.userId === userId);
-    const recipientWallet = wallets.find(w => w.userId === recipientId);
+    const senderWallet = wallets.find(w => w.userName === username);
+    const recipientWallet = wallets.find(w => w.userName === recipientUsername);
 
     if (!senderWallet || !recipientWallet) return res.status(404).json({ error: "Wallet not found" });
     if (amount > senderWallet.balance) return res.status(400).json({ error: "Insufficient balance" });
@@ -48,19 +48,19 @@ export default async function handler(req, res) {
 
     const nextId = transactions.length + 1;
     transactions.push({
-      id: nextId,
-      userId,
+      transactionId: nextId,
+      userId: senderWallet.userId,
       type: "debit",
       amount,
-      description: `Sent to user ${recipientId}`,
+      description: `Sent to ${recipientUsername}`,
       date: new Date().toISOString()
     });
     transactions.push({
-      id: nextId + 1,
-      userId: recipientId,
+      transactionId: nextId + 1,
+      userId: recipientWallet.userId,
       type: "credit",
       amount,
-      description: `Received from user ${userId}`,
+      description: `Received from ${username}`,
       date: new Date().toISOString()
     });
 

@@ -19,8 +19,8 @@ export default async function handler(req, res) {
     const user = users.find(u => u.username === username && u.password === password);
     if (!user) return res.status(401).json({ error: "Invalid credentials" });
 
-    // Mock token (simple string)
-    const token = `mock-token-${user.id}`;
+    // Mock token with username
+    const token = `mock-token-${user.username}`;
 
     return res.status(200).json({
       token,

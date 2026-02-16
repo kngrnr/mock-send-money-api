@@ -7,8 +7,8 @@ const API_KEY = process.env.JSONBIN_API_KEY;
 export default async function handler(req, res) {
   if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
-  const userId = checkAuth(req);
-  if (!userId) return res.status(401).json({ error: "Unauthorized" });
+  const username = checkAuth(req);
+  if (!username) return res.status(401).json({ error: "Unauthorized" });
 
   try {
     const walletsResp = await fetch(`https://api.jsonbin.io/v3/b/${WALLETS_BIN_ID}/latest`, {
@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     const walletsData = await walletsResp.json();
     const wallets = walletsData.record;
 
-    const wallet = wallets.find(w => w.userId === userId);
+    const wallet = wallets.find(w => w.userName === username);
     if (!wallet) return res.status(404).json({ error: "Wallet not found" });
 
     return res.status(200).json(wallet);
